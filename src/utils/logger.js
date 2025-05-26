@@ -1,7 +1,6 @@
 import { createLogger, format, transports } from "winston";
 import path from "path";
 import { fileURLToPath } from "url";
-import config from "../config/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +21,7 @@ const logger = createLogger({
   ],
 });
 
-if (config.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production") {
   logger.add(
     new transports.Console({
       format: format.simple(),

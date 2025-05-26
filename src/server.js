@@ -1,7 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import config from "./config/index.js";
 import logger from "./utils/logger.js";
 
 dotenv.config();
@@ -16,7 +15,7 @@ app.get("/", (req, res) => {
   res.status(200).json({ message: "CRM-API Aktif" });
 });
 
-const PORT = config.PORT;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   logger.info(`Server ${PORT} portunda çalışıyor`);
