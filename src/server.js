@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import config from "./src/config/index.js";
-import logger from "./src/utils/logger.js";
+import config from "./config/index.js";
+import logger from "./utils/logger.js";
 
 dotenv.config();
 const app = express();
@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   logger.info("Ana sayfa GET isteği geldi");
-  res.statusCode(200).json({ message: "CRM-API Aktif" });
+  res.status(200).json({ message: "CRM-API Aktif" });
 });
 
 const PORT = config.PORT;
