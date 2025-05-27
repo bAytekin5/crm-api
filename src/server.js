@@ -7,6 +7,7 @@ import Database from "./db/Database.js";
 
 import authRoutes from "./routes/auth.route.js";
 import adminRoutes from "./routes/admin.route.js";
+import customerRoutes from "./routes/customer.routes.js";
 
 import { HTTP_CODES } from "./config/Enum.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
@@ -18,8 +19,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/auth", authRoutes);
 app.use("/api", adminRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/customers", customerRoutes);
 
 app.get("/", (req, res) => {
   logger.info("Ana sayfa GET isteği geldi");
