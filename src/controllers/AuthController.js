@@ -25,4 +25,8 @@ export default class AuthController {
       next(err);
     }
   }
+
+  getProfile(req, res) {
+    res.status(HTTP_CODES.OK).json({ user: req.user });
+  }
 }
