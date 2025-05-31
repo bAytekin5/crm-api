@@ -1,3 +1,4 @@
+// src/core/BaseController.js
 import { HTTP_CODES } from "../config/Enum.js";
 import ApiError from "../utils/ApiError.js";
 
@@ -5,6 +6,7 @@ export default class BaseController {
   constructor(service) {
     this.service = service;
 
+    this.create = this.create.bind(this);
     this.getAll = this.getAll.bind(this);
     this.getById = this.getById.bind(this);
     this.update = this.update.bind(this);
@@ -43,7 +45,7 @@ export default class BaseController {
 
   async update(req, res, next) {
     try {
-      const data = await this.service.update(req.params.id, req.body);
+      const data = await this.service.update(req.params.id, req.body, req.user?._id);
       if (!data) {
         throw new ApiError(HTTP_CODES.NOT_FOUND, "No record found to update!");
       }
@@ -55,9 +57,9 @@ export default class BaseController {
 
   async delete(req, res, next) {
     try {
-      const data = await this.service.delete(req.params.id);
+      const data = await this.service.delete(req.params.id, req.user?._id);
       if (!data) {
-        throw new ApiError(HTTP_CODES.NOT_FOUND, "No records found to delete!");
+        throw new ApiError(HTTP_CODES.NOT_FOUND, "No record found to delete!");
       }
       res.status(HTTP_CODES.OK).json(data);
     } catch (err) {
