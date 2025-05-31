@@ -9,11 +9,11 @@ export default class CustomerService {
   }
 
   async create(data, userId) {
-    return await Customer.create({ ...data, createdBy: userId });
+    return await this.model.create({ ...data, createdBy: userId });
   }
 
   async getAll() {
-    return await Customer.find({ isDeleted: false });
+    return await this.model.find({ isDeleted: false });
   }
 
   async getById(id) {
