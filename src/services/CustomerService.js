@@ -12,8 +12,38 @@ export default class CustomerService {
     return await this.model.create({ ...data, createdBy: userId });
   }
 
-  async getAll() {
-    return await this.model.find({ isDeleted: false });
+  async getAll(query = {}) {
+    const {
+      search,
+      tags,
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      order = "desc",
+    } = query;
+
+    const filter = { isDeleted: false };
+
+    if (search) {
+      filter.$or = [
+        { name: new RegExp(search, "i") },
+        { email: new RegExp(search, "i") },
+      ];
+    }
+
+    if (tags) {
+      const tagArray = tags.split(",");
+      filter.tags = { $in: tagArray };
+    }
+
+    const sort = { [sortBy]: order === "desc" ? -1 : 1 };
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.model.find(filter).sort(sort).skip(skip).limit(parseInt(limit)),
+      this.model.countDocuments(filter),
+    ]);
+
+    return { total, page: parseInt(page), limit: parseInt(limit), data };
   }
 
   async getById(id) {

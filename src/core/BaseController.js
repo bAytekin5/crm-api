@@ -24,7 +24,7 @@ export default class BaseController {
 
   async getAll(req, res, next) {
     try {
-      const data = await this.service.getAll();
+      const data = await this.service.getAll(req.query);
       res.status(HTTP_CODES.OK).json(data);
     } catch (err) {
       next(err);
