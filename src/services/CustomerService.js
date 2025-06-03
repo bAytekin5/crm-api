@@ -2,6 +2,7 @@ import Customer from "../db/models/CustomerModel.js";
 import ApiError from "../utils/ApiError.js";
 import { HTTP_CODES } from "../config/Enum.js";
 import { validateObjectId } from "../utils/validateObjectId.js";
+import AuditLogService from "./AuditLogService.js";
 
 export default class CustomerService {
   constructor() {
@@ -72,6 +73,15 @@ export default class CustomerService {
         HTTP_CODES.NOT_FOUND,
         "Customer not found or already deleted"
       );
+    }
+    if (customer) {
+      await AuditLogService.log({
+        userId,
+        operation: "update",
+        model: "Customer",
+        recordId: customer._id,
+        details: { updatedFields: data },
+      });
     }
     return customer;
   }
