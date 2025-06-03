@@ -15,7 +15,6 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 dotenv.config();
 const app = express();
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/", (req, res) => {
   logger.info("Ana sayfa GET isteği geldi");
