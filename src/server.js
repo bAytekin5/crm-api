@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import logger from "./utils/logger.js";
-
+import { swaggerUi, swaggerSpec } from "./config/swagger.js";
 import Database from "./db/Database.js";
 
 import authRoutes from "./routes/auth.route.js";
@@ -15,6 +15,7 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 dotenv.config();
 const app = express();
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

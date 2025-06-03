@@ -25,6 +25,24 @@ router.post(
   customerController.create
 );
 
+/**
+ * @swagger
+ * /customers:
+ *   get:
+ *     summary: Müşteri listesini getir
+ *     tags: [Customers]
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Müşteri ismine göre arama
+ *     responses:
+ *       200:
+ *         description: Müşteri listesi döndürüldü
+ */
+router.get("/", protect, customerController.getAll);
+
 router.get("/", protect, customerController.getAll);
 
 router.put(
