@@ -1,4 +1,6 @@
 import AuditLogService from "../services/AuditLogService.js";
+import { validateObjectId } from "../utils/validateObjectId.js";
+import logger from "../utils/logger.js";
 
 export default class BaseAuditService {
   constructor(model, modelName) {
@@ -16,6 +18,8 @@ export default class BaseAuditService {
       recordId: document._id,
       details: data,
     });
+
+    logger.info(`[CREATE] ${this.modelName} created by user ${userId}`);
     return document;
   }
 
@@ -24,10 +28,13 @@ export default class BaseAuditService {
   }
 
   async getById(id) {
+    validateObjectId(id);
     return await this.model.findOne({ _id: id, isDeleted: false });
   }
 
   async update(id, data, userId) {
+    validateObjectId(id);
+
     const updated = await this.model.findOneAndUpdate(
       { _id: id, isDeleted: false },
       { ...data, updatedBy: userId },
@@ -42,12 +49,16 @@ export default class BaseAuditService {
         recordId: id,
         details: data,
       });
+
+      logger.info(`[UPDATE] ${this.modelName} ${id} updated by user ${userId}`);
     }
 
     return updated;
   }
 
   async delete(id, userId) {
+    validateObjectId(id);
+
     const deleted = await this.model.findOneAndUpdate(
       { _id: id, isDeleted: false },
       { isDeleted: true, updatedBy: userId },
@@ -62,7 +73,12 @@ export default class BaseAuditService {
         recordId: id,
         details: { softDeleted: true },
       });
+
+      logger.info(
+        `[DELETE] ${this.modelName} ${id} soft-deleted by user ${userId}`
+      );
     }
+
     return deleted;
   }
 }
