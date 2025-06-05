@@ -1,16 +1,11 @@
 import Customer from "../db/models/CustomerModel.js";
 import ApiError from "../utils/ApiError.js";
 import { HTTP_CODES } from "../config/Enum.js";
-import { validateObjectId } from "../utils/validateObjectId.js";
-import AuditLogService from "./AuditLogService.js";
+import BaseAuditService from "../core/BaseAuditService.js";
 
-export default class CustomerService {
+export default class CustomerService extends BaseAuditService {
   constructor() {
-    this.model = Customer;
-  }
-
-  async create(data, userId) {
-    return await this.model.create({ ...data, createdBy: userId });
+    super(Customer, "Customer");
   }
 
   async getAll(query = {}) {
@@ -33,74 +28,46 @@ export default class CustomerService {
     }
 
     if (tags) {
-      const tagArray = tags.split(",");
-      filter.tags = { $in: tagArray };
+      const tagArray = tags.split(",").filter(tag => tag.trim() !== "");
+      if (tagArray.length > 0) {
+        filter.tags = { $in: tagArray };
+      }
     }
 
+    const parsedLimit = parseInt(limit, 10) || 10;
+    const parsedPage = parseInt(page, 10) || 1;
+    const skip = (parsedPage - 1) * parsedLimit;
     const sort = { [sortBy]: order === "desc" ? -1 : 1 };
-    const skip = (page - 1) * limit;
+
     const [data, total] = await Promise.all([
-      this.model.find(filter).sort(sort).skip(skip).limit(parseInt(limit)),
+      this.model.find(filter).sort(sort).skip(skip).limit(parsedLimit),
       this.model.countDocuments(filter),
     ]);
 
-    return { total, page: parseInt(page), limit: parseInt(limit), data };
+    return {
+      total,
+      page: parsedPage,
+      limit: parsedLimit,
+      data,
+    };
   }
 
   async getById(id) {
-    validateObjectId(id);
-
-    const customer = await this.model.findOne({ _id: id, isDeleted: false });
-
+    const customer = await super.getById(id);
     if (!customer) {
       throw new ApiError(HTTP_CODES.NOT_FOUND, "Customer not found");
-    }
-
-    return customer;
-  }
-
-  async update(id, data, userId) {
-    validateObjectId(id);
-
-    const customer = await this.model.findOneAndUpdate(
-      { _id: id, isDeleted: false },
-      { ...data, updatedBy: userId },
-      { new: true }
-    );
-
-    if (!customer) {
-      throw new ApiError(
-        HTTP_CODES.NOT_FOUND,
-        "Customer not found or already deleted"
-      );
-    }
-    if (customer) {
-      await AuditLogService.log({
-        userId,
-        operation: "update",
-        model: "Customer",
-        recordId: customer._id,
-        details: { updatedFields: data },
-      });
     }
     return customer;
   }
 
   async delete(id, userId) {
-    validateObjectId(id);
-
-    const customer = await this.model.findOneAndUpdate(
-      { _id: id, isDeleted: false },
-      { isDeleted: true, updatedBy: userId },
-      { new: true }
-    );
-
+    const customer = await super.delete(id, userId);
     if (!customer) {
       throw new ApiError(
         HTTP_CODES.NOT_FOUND,
         "Customer not found or already deleted"
       );
     }
-    return { message: "Customer successfully delete (soft delete)" };
+    return { message: "Customer successfully deleted (soft delete)" };
   }
 }
